@@ -137,7 +137,7 @@ void AuthenticationRequest::onCorrupt(NasMessageMutator &m, int ieIndex, const O
     switch (ieIndex)
     {
     case 0:
-        m.mandatoryIE1(&ngKSI);
+        m.corruptValue1(&ngKSI, bytes);
         break;
     case 1:
         m.corruptValue(&abba, bytes);
@@ -226,7 +226,7 @@ void AuthenticationResult::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
     switch (ieIndex)
     {
     case 0:
-        m.mandatoryIE1(&ngKSI);
+        m.corruptValue1(&ngKSI, bytes);
         break;
     case 1:
         m.corruptValue(&eapMessage, bytes);
@@ -552,7 +552,7 @@ void DeRegistrationRequestUeTerminated::onCorrupt(NasMessageMutator &m, int ieIn
     switch (ieIndex)
     {
     case 0:
-        m.mandatoryIE1(&deRegistrationType);
+        m.corruptValue1(&deRegistrationType, bytes);
         break;
     case 1:
         m.corruptOptionalIE(0x58, &mmCause, bytes);
@@ -616,7 +616,7 @@ void DlNasTransport::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStr
     switch (ieIndex)
     {
     case 0:
-        m.mandatoryIE1(&payloadContainerType);
+        m.corruptValue1(&payloadContainerType, bytes);
         break;
     case 1:
         m.corruptValue(&payloadContainer, bytes);
@@ -2269,7 +2269,7 @@ void SecurityModeCommand::onCorrupt(NasMessageMutator &m, int ieIndex, const Oct
         m.corruptValue(&selectedNasSecurityAlgorithms, bytes);
         break;
     case 1:
-        m.mandatoryIE1(&ngKsi);
+        m.corruptValue1(&ngKsi, bytes);
         break;
     case 2:
         m.corruptValue(&replayedUeSecurityCapabilities, bytes);
@@ -2623,7 +2623,7 @@ void UlNasTransport::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStr
     switch (ieIndex)
     {
     case 0:
-        m.mandatoryIE1(&payloadContainerType);
+        m.corruptValue1(&payloadContainerType, bytes);
         break;
     case 1:
         m.corruptValue(&payloadContainer, bytes);
