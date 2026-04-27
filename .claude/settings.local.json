@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3)",
+      "Bash(cmake --build .)",
+      "Bash(git clone *)",
+      "Bash(cp /tmp/ueransim_orig/src/lib/nas/msg.cpp /home/liuxz/5G/UERANSIM_CoreTesting/src/lib/nas/msg.cpp.orig)",
+      "Read(//tmp/ueransim_orig/src/lib/nas/**)"
+    ]
+  }
+}
