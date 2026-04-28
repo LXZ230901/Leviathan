@@ -17,6 +17,7 @@ namespace nas
 struct InformationElement
 {
     virtual ~InformationElement() = default;
+    mutable int fakeLength = -1; // -1 = use actual length; >= 0 = override length field (CWE-119/120)
 };
 
 struct InformationElement1 : InformationElement
@@ -134,7 +135,7 @@ static inline void EncodeIe4(const T &ie, OctetString &stream)
     stream.appendOctet(0);
     T::Encode(ie, stream);
     int length = stream.length() - index - 1;
-    stream.data()[index] = length;
+    stream.data()[index] = (ie.fakeLength >= 0) ? (uint8_t)ie.fakeLength : (uint8_t)length;
 }
 
 template <typename T>
@@ -158,8 +159,16 @@ static inline void EncodeIe6(const T &ie, OctetString &stream)
     stream.appendOctet2(0);
     T::Encode(ie, stream);
     int length = stream.length() - index - 2;
-    stream.data()[index] = (length >> 8) & 0xFF;
-    stream.data()[index + 1] = length & 0xFF;
+    if (ie.fakeLength >= 0)
+    {
+        stream.data()[index] = (ie.fakeLength >> 8) & 0xFF;
+        stream.data()[index + 1] = ie.fakeLength & 0xFF;
+    }
+    else
+    {
+        stream.data()[index] = (length >> 8) & 0xFF;
+        stream.data()[index + 1] = length & 0xFF;
+    }
 }
 
 template <typename T>

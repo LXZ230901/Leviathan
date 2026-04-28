@@ -132,6 +132,20 @@ struct NasMessageMutator
     {
         ptr->reset();
     }
+
+    // setIELength primitives: fake length field for IE4/IE6 (CWE-119/120, buffer overflow)
+    template <typename T>
+    inline void setIELength(T *ptr, int fakeLen)
+    {
+        ptr->fakeLength = fakeLen;
+    }
+
+    template <typename T>
+    inline void setIELengthOptional(std::optional<T> *ptr, int fakeLen)
+    {
+        if (ptr->has_value())
+            ptr->value().fakeLength = fakeLen;
+    }
 };
 
 }

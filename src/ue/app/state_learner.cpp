@@ -912,6 +912,109 @@ void UeStateLearner::execute_command(std::string msg)
             enableFuzzing = true;
             break;}
 
+        case MsgType::setIeLength:{
+            enableFuzzing = false;
+            notify_response("OK");
+            std::cout << "setIeLength" << std::endl;
+            // get size of binary message
+            size_t size = 1000;
+            if (index != std::string::npos)
+                size = std::stoi(sub_str);
+            // read setIeLength data: <msgName>:<ieIndex>:<fakeLen>
+            OctetString raw = recv_incoming_message(size);
+            std::string rawStr((const char*)raw.data(), raw.length());
+            size_t c1 = rawStr.find_first_of(":");
+            size_t c2 = rawStr.find_last_of(":");
+            if (c1 == std::string::npos || c2 == std::string::npos || c1 == c2)
+            {
+                notify_response("invalid setIeLength format, expected msgName:ieIndex:fakeLen");
+                enableFuzzing = true;
+                break;
+            }
+            std::string msgName = rawStr.substr(0, c1);
+            int ieIndex = std::stoi(rawStr.substr(c1 + 1, c2 - c1 - 1));
+            int fakeLen = std::stoi(rawStr.substr(c2 + 1));
+            std::cout << "setIeLength: msg=" << msgName << " ieIndex=" << ieIndex << " fakeLen=" << fakeLen << std::endl;
+
+            if (msgMap.count(msgName) == 0)
+            {
+                notify_response("unknown message name");
+                enableFuzzing = true;
+                break;
+            }
+
+            MsgType targetType = msgMap[msgName];
+            nas::NasMessageMutator mutator;
+
+            // dispatch to the stored message and call onSetLength
+            switch (targetType)
+            {
+            case MsgType::registrationRequestIMSI:
+                registrationRequestIMSI.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(registrationRequestIMSI);
+                break;
+            case MsgType::registrationRequestGUTI:
+                registrationRequestGUTI.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(registrationRequestGUTI);
+                break;
+            case MsgType::registrationComplete:{
+                auto msg = nas::RegistrationComplete{};
+                msg.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(msg);
+                break;}
+            case MsgType::deregistrationRequest:
+                deregistrationRequest.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(deregistrationRequest);
+                break;
+            case MsgType::serviceRequest:
+                serviceRequest.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendServiceRequest(EServiceReqCause::IDLE_UPLINK_SIGNAL_PENDING);
+                mm->sendNasMessage(serviceRequest);
+                break;
+            case MsgType::securityModeReject:
+                securityModeReject.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(securityModeReject);
+                break;
+            case MsgType::authenticationResponse:
+                authenticationResponse.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(authenticationResponse);
+                break;
+            case MsgType::authenticationFailure:
+                authenticationFailure.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(authenticationFailure);
+                break;
+            case MsgType::securityModeComplete:
+                securityModeComplete.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(securityModeComplete);
+                break;
+            case MsgType::identityResponse:
+                identityResponse.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(identityResponse);
+                break;
+            case MsgType::configurationUpdateComplete:{
+                auto msg = nas::ConfigurationUpdateComplete{};
+                msg.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(msg);
+                break;}
+            case MsgType::gmmStatus:
+                gmmStatus.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(gmmStatus);
+                break;
+            case MsgType::ulNasTransport:
+                ulNasTransport.onSetLength(mutator, ieIndex, fakeLen);
+                mm->sendNasMessage(ulNasTransport);
+                break;
+            // SM messages not directly supported for setIeLength
+            // (inner SM message must be decoded from UlNasTransport wrapper first -- TODO)
+            default:
+                notify_response("message type not supported for setIeLength");
+                break;
+            }
+
+            notify_response("OK");
+            enableFuzzing = true;
+            break;}
+
         default:
             std::cout << "Unknown fuzzing message name" << std::endl;
             notify_response("Unknown fuzzing message name");

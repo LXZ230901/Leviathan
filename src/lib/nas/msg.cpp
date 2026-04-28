@@ -74,6 +74,21 @@ void AuthenticationFailure::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void AuthenticationFailure::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&authenticationFailureParameter, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 AuthenticationReject::AuthenticationReject()
 {
@@ -111,6 +126,18 @@ void AuthenticationReject::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&eapMessage, fakeLen);
         break;
     default:
         break;
@@ -201,6 +228,30 @@ void AuthenticationRequest::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 4:
         m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&abba, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        m.setIELengthOptional(&authParamAUTN, fakeLen);
+        break;
+    case 4:
+        m.setIELengthOptional(&eapMessage, fakeLen);
         break;
     default:
         break;
@@ -302,6 +353,24 @@ void AuthenticationResult::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 2:
         m.omitOptionalIE(&abba);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationResult::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&eapMessage, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&abba, fakeLen);
         break;
     default:
         break;
@@ -518,6 +587,66 @@ void ConfigurationUpdateCommand::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void ConfigurationUpdateCommand::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&guti, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&taiList, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&allowedNssai, fakeLen);
+        break;
+    case 4:
+        m.setIELengthOptional(&serviceAreaList, fakeLen);
+        break;
+    case 5:
+        m.setIELengthOptional(&networkFullName, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&networkShortName, fakeLen);
+        break;
+    case 7:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 8:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 9:
+        m.setIELengthOptional(&networkDaylightSavingTime, fakeLen);
+        break;
+    case 10:
+        m.setIELengthOptional(&ladnInformation, fakeLen);
+        break;
+    case 11:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 12:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 13:
+        m.setIELengthOptional(&configuredNssai, fakeLen);
+        break;
+    case 14:
+        m.setIELengthOptional(&rejectedNssai, fakeLen);
+        break;
+    case 15:
+        m.setIELengthOptional(&operatorDefinedAccessCategoryDefinitions, fakeLen);
+        break;
+    case 16:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    default:
+        break;
+    }
+}
+
 
 ConfigurationUpdateComplete::ConfigurationUpdateComplete()
 {
@@ -545,6 +674,15 @@ void ConfigurationUpdateComplete::onCorrupt(NasMessageMutator &m, int ieIndex, c
 }
 
 void ConfigurationUpdateComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    default:
+        break;
+    }
+}
+
+void ConfigurationUpdateComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
 {
     switch (ieIndex)
     {
@@ -588,6 +726,15 @@ void DeRegistrationAcceptUeOriginating::onOmit(NasMessageMutator &m, int ieIndex
     }
 }
 
+void DeRegistrationAcceptUeOriginating::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    default:
+        break;
+    }
+}
+
 
 DeRegistrationAcceptUeTerminated::DeRegistrationAcceptUeTerminated()
 {
@@ -615,6 +762,15 @@ void DeRegistrationAcceptUeTerminated::onCorrupt(NasMessageMutator &m, int ieInd
 }
 
 void DeRegistrationAcceptUeTerminated::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    default:
+        break;
+    }
+}
+
+void DeRegistrationAcceptUeTerminated::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
 {
     switch (ieIndex)
     {
@@ -678,6 +834,21 @@ void DeRegistrationRequestUeOriginating::onOmit(NasMessageMutator &m, int ieInde
         break;
     case 1:
         this->omitMandatory.insert(1);
+        break;
+    default:
+        break;
+    }
+}
+
+void DeRegistrationRequestUeOriginating::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&mobileIdentity, fakeLen);
         break;
     default:
         break;
@@ -748,6 +919,24 @@ void DeRegistrationRequestUeTerminated::onOmit(NasMessageMutator &m, int ieIndex
         break;
     case 2:
         m.omitOptionalIE(&t3346Value);
+        break;
+    default:
+        break;
+    }
+}
+
+void DeRegistrationRequestUeTerminated::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 2:
+        m.setIELengthOptional(&t3346Value, fakeLen);
         break;
     default:
         break;
@@ -854,6 +1043,33 @@ void DlNasTransport::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void DlNasTransport::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&payloadContainer, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        m.setIELengthOptional(&additionalInformation, fakeLen);
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        m.setIELengthOptional(&backOffTimerValue, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 FiveGMmStatus::FiveGMmStatus()
 {
@@ -897,6 +1113,18 @@ void FiveGMmStatus::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void FiveGMmStatus::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    default:
+        break;
+    }
+}
+
 
 FiveGSmStatus::FiveGSmStatus()
 {
@@ -933,6 +1161,18 @@ void FiveGSmStatus::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
+void FiveGSmStatus::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
         break;
     default:
         break;
@@ -982,6 +1222,18 @@ void IdentityRequest::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void IdentityRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    default:
+        break;
+    }
+}
+
 
 IdentityResponse::IdentityResponse()
 {
@@ -1019,6 +1271,18 @@ void IdentityResponse::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
+void IdentityResponse::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELength(&mobileIdentity, fakeLen);
         break;
     default:
         break;
@@ -1068,6 +1332,18 @@ void Notification::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void Notification::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    default:
+        break;
+    }
+}
+
 
 NotificationResponse::NotificationResponse()
 {
@@ -1105,6 +1381,18 @@ void NotificationResponse::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         m.omitOptionalIE(&pduSessionStatus);
+        break;
+    default:
+        break;
+    }
+}
+
+void NotificationResponse::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
         break;
     default:
         break;
@@ -1170,6 +1458,21 @@ void PduSessionAuthenticationCommand::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionAuthenticationCommand::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELength(&eapMessage, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionAuthenticationComplete::PduSessionAuthenticationComplete()
 {
@@ -1229,6 +1532,21 @@ void PduSessionAuthenticationComplete::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionAuthenticationComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELength(&eapMessage, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionAuthenticationResult::PduSessionAuthenticationResult()
 {
@@ -1282,6 +1600,21 @@ void PduSessionAuthenticationResult::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 1:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionAuthenticationResult::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -1457,6 +1790,54 @@ void PduSessionEstablishmentAccept::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionEstablishmentAccept::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&authorizedQoSRules, fakeLen);
+        break;
+    case 2:
+        m.setIELength(&sessionAmbr, fakeLen);
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        m.setIELengthOptional(&pduAddress, fakeLen);
+        break;
+    case 5:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 6:
+        m.setIELengthOptional(&sNssai, fakeLen);
+        break;
+    case 7:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 8:
+        m.setIELengthOptional(&mappedEpsBearerContexts, fakeLen);
+        break;
+    case 9:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 10:
+        m.setIELengthOptional(&authorizedQoSFlowDescriptions, fakeLen);
+        break;
+    case 11:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    case 12:
+        m.setIELengthOptional(&dnn, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionEstablishmentReject::PduSessionEstablishmentReject()
 {
@@ -1540,6 +1921,30 @@ void PduSessionEstablishmentReject::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 4:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionEstablishmentReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&backOffTimerValue, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 4:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -1665,6 +2070,39 @@ void PduSessionEstablishmentRequest::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionEstablishmentRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        m.setIELengthOptional(&smCapability, fakeLen);
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 6:
+        m.setIELengthOptional(&smPduDnRequestContainer, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationCommand::PduSessionModificationCommand()
 {
@@ -1784,6 +2222,39 @@ void PduSessionModificationCommand::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionModificationCommand::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&sessionAmbr, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        m.setIELengthOptional(&authorizedQoSRules, fakeLen);
+        break;
+    case 5:
+        m.setIELengthOptional(&mappedEpsBearerContexts, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&authorizedQoSFlowDescriptions, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationCommandReject::PduSessionModificationCommandReject()
 {
@@ -1843,6 +2314,21 @@ void PduSessionModificationCommandReject::onOmit(NasMessageMutator &m, int ieInd
     }
 }
 
+void PduSessionModificationCommandReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationComplete::PduSessionModificationComplete()
 {
@@ -1879,6 +2365,18 @@ void PduSessionModificationComplete::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionModificationComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -1948,6 +2446,24 @@ void PduSessionModificationReject::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 2:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionModificationReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&backOffTimerValue, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -2083,6 +2599,42 @@ void PduSessionModificationRequest::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionModificationRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&smCapability, fakeLen);
+        break;
+    case 1:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        m.setIELengthOptional(&requestedQosRules, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&requestedQosFlowDescriptions, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&mappedEpsBearerContexts, fakeLen);
+        break;
+    case 8:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseCommand::PduSessionReleaseCommand()
 {
@@ -2162,6 +2714,27 @@ void PduSessionReleaseCommand::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionReleaseCommand::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&backOffTimerValue, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseComplete::PduSessionReleaseComplete()
 {
@@ -2215,6 +2788,21 @@ void PduSessionReleaseComplete::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 1:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionReleaseComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -2280,6 +2868,21 @@ void PduSessionReleaseReject::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void PduSessionReleaseReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseRequest::PduSessionReleaseRequest()
 {
@@ -2333,6 +2936,21 @@ void PduSessionReleaseRequest::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 1:
         m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionReleaseRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&extendedProtocolConfigurationOptions, fakeLen);
         break;
     default:
         break;
@@ -2629,6 +3247,90 @@ void RegistrationAccept::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void RegistrationAccept::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELength(&registrationResult, fakeLen);
+        break;
+    case 1:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        m.setIELengthOptional(&mobileIdentity, fakeLen);
+        break;
+    case 5:
+        m.setIELengthOptional(&equivalentPLMNs, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&taiList, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&allowedNSSAI, fakeLen);
+        break;
+    case 8:
+        m.setIELengthOptional(&rejectedNSSAI, fakeLen);
+        break;
+    case 9:
+        m.setIELengthOptional(&configuredNSSAI, fakeLen);
+        break;
+    case 10:
+        m.setIELengthOptional(&networkFeatureSupport, fakeLen);
+        break;
+    case 11:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
+        break;
+    case 12:
+        m.setIELengthOptional(&pduSessionReactivationResult, fakeLen);
+        break;
+    case 13:
+        m.setIELengthOptional(&pduSessionReactivationResultErrorCause, fakeLen);
+        break;
+    case 14:
+        m.setIELengthOptional(&ladnInformation, fakeLen);
+        break;
+    case 15:
+        m.setIELengthOptional(&serviceAreaList, fakeLen);
+        break;
+    case 16:
+        m.setIELengthOptional(&t3512Value, fakeLen);
+        break;
+    case 17:
+        m.setIELengthOptional(&non3gppDeRegistrationTimerValue, fakeLen);
+        break;
+    case 18:
+        m.setIELengthOptional(&t3502Value, fakeLen);
+        break;
+    case 19:
+        m.setIELengthOptional(&emergencyNumberList, fakeLen);
+        break;
+    case 20:
+        m.setIELengthOptional(&extendedEmergencyNumberList, fakeLen);
+        break;
+    case 21:
+        m.setIELengthOptional(&sorTransparentContainer, fakeLen);
+        break;
+    case 22:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 23:
+        m.setIELengthOptional(&operatorDefinedAccessCategoryDefinitions, fakeLen);
+        break;
+    case 24:
+        m.setIELengthOptional(&negotiatedDrxParameters, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 RegistrationComplete::RegistrationComplete()
 {
@@ -2666,6 +3368,18 @@ void RegistrationComplete::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         m.omitOptionalIE(&sorTransparentContainer);
+        break;
+    default:
+        break;
+    }
+}
+
+void RegistrationComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&sorTransparentContainer, fakeLen);
         break;
     default:
         break;
@@ -2746,6 +3460,27 @@ void RegistrationReject::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 3:
         m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
+void RegistrationReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&t3346value, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&t3502value, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&eapMessage, fakeLen);
         break;
     default:
         break;
@@ -3013,6 +3748,81 @@ void RegistrationRequest::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void RegistrationRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&mobileIdentity, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        m.setIELengthOptional(&mmCapability, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&ueSecurityCapability, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&requestedNSSAI, fakeLen);
+        break;
+    case 8:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 9:
+        m.setIELengthOptional(&s1UeNetworkCapability, fakeLen);
+        break;
+    case 10:
+        m.setIELengthOptional(&uplinkDataStatus, fakeLen);
+        break;
+    case 11:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
+        break;
+    case 12:
+        m.setIELengthOptional(&ueStatus, fakeLen);
+        break;
+    case 13:
+        m.setIELengthOptional(&additionalGuti, fakeLen);
+        break;
+    case 14:
+        m.setIELengthOptional(&allowedPduSessionStatus, fakeLen);
+        break;
+    case 15:
+        m.setIELengthOptional(&uesUsageSetting, fakeLen);
+        break;
+    case 16:
+        m.setIELengthOptional(&requestedDrxParameters, fakeLen);
+        break;
+    case 17:
+        m.setIELengthOptional(&epsNasMessageContainer, fakeLen);
+        break;
+    case 18:
+        m.setIELengthOptional(&ladnIndication, fakeLen);
+        break;
+    case 19:
+        m.setIELengthOptional(&payloadContainer, fakeLen);
+        break;
+    case 20:
+        m.setIELengthOptional(&updateType, fakeLen);
+        break;
+    case 21:
+        m.setIELengthOptional(&nasMessageContainer, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeCommand::SecurityModeCommand()
 {
@@ -3143,6 +3953,42 @@ void SecurityModeCommand::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void SecurityModeCommand::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 2:
+        m.setIELength(&replayedUeSecurityCapabilities, fakeLen);
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        m.setIELengthOptional(&additional5gSecurityInformation, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&abba, fakeLen);
+        break;
+    case 8:
+        m.setIELengthOptional(&replayedS1UeNetworkCapability, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeComplete::SecurityModeComplete()
 {
@@ -3203,6 +4049,21 @@ void SecurityModeComplete::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void SecurityModeComplete::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&imeiSv, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&nasMessageContainer, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeReject::SecurityModeReject()
 {
@@ -3240,6 +4101,18 @@ void SecurityModeReject::onOmit(NasMessageMutator &m, int ieIndex)
     {
     case 0:
         this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
+void SecurityModeReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
         break;
     default:
         break;
@@ -3326,6 +4199,27 @@ void ServiceAccept::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void ServiceAccept::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&pduSessionReactivationResult, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&pduSessionReactivationResultErrorCause, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&eapMessage, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 ServiceReject::ServiceReject()
 {
@@ -3400,6 +4294,27 @@ void ServiceReject::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 3:
         m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
+void ServiceReject::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&t3346Value, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&eapMessage, fakeLen);
         break;
     default:
         break;
@@ -3500,6 +4415,33 @@ void ServiceRequest::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 5:
         m.omitOptionalIE(&nasMessageContainer);
+        break;
+    default:
+        break;
+    }
+}
+
+void ServiceRequest::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&tmsi, fakeLen);
+        break;
+    case 2:
+        m.setIELengthOptional(&uplinkDataStatus, fakeLen);
+        break;
+    case 3:
+        m.setIELengthOptional(&pduSessionStatus, fakeLen);
+        break;
+    case 4:
+        m.setIELengthOptional(&allowedPduSessionStatus, fakeLen);
+        break;
+    case 5:
+        m.setIELengthOptional(&nasMessageContainer, fakeLen);
         break;
     default:
         break;
@@ -3626,6 +4568,39 @@ void UlNasTransport::onOmit(NasMessageMutator &m, int ieIndex)
     }
 }
 
+void UlNasTransport::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 1:
+        m.setIELength(&payloadContainer, fakeLen);
+        break;
+    case 2:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 3:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 4:
+        // IE1/IE2/IE3: no length prefix, no-op
+        break;
+    case 5:
+        m.setIELengthOptional(&sNssai, fakeLen);
+        break;
+    case 6:
+        m.setIELengthOptional(&dnn, fakeLen);
+        break;
+    case 7:
+        m.setIELengthOptional(&additionalInformation, fakeLen);
+        break;
+    default:
+        break;
+    }
+}
+
 
 void AuthenticationResponse::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes)
 {
@@ -3651,6 +4626,21 @@ void AuthenticationResponse::onOmit(NasMessageMutator &m, int ieIndex)
         break;
     case 1:
         m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationResponse::onSetLength(NasMessageMutator &m, int ieIndex, int fakeLen)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.setIELengthOptional(&authenticationResponseParameter, fakeLen);
+        break;
+    case 1:
+        m.setIELengthOptional(&eapMessage, fakeLen);
         break;
     default:
         break;

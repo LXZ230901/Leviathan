@@ -802,30 +802,6 @@ nas/msg.cpp.s:
 	cd /home/liuxz/5G/UERANSIM_CoreTesting && $(MAKE) $(MAKESILENT) -f src/lib/CMakeFiles/common-lib.dir/build.make src/lib/CMakeFiles/common-lib.dir/nas/msg.cpp.s
 .PHONY : nas/msg.cpp.s
 
-nas/msg_clean.o: nas/msg_clean.cpp.o
-.PHONY : nas/msg_clean.o
-
-# target to build an object file
-nas/msg_clean.cpp.o:
-	cd /home/liuxz/5G/UERANSIM_CoreTesting && $(MAKE) $(MAKESILENT) -f src/lib/CMakeFiles/common-lib.dir/build.make src/lib/CMakeFiles/common-lib.dir/nas/msg_clean.cpp.o
-.PHONY : nas/msg_clean.cpp.o
-
-nas/msg_clean.i: nas/msg_clean.cpp.i
-.PHONY : nas/msg_clean.i
-
-# target to preprocess a source file
-nas/msg_clean.cpp.i:
-	cd /home/liuxz/5G/UERANSIM_CoreTesting && $(MAKE) $(MAKESILENT) -f src/lib/CMakeFiles/common-lib.dir/build.make src/lib/CMakeFiles/common-lib.dir/nas/msg_clean.cpp.i
-.PHONY : nas/msg_clean.cpp.i
-
-nas/msg_clean.s: nas/msg_clean.cpp.s
-.PHONY : nas/msg_clean.s
-
-# target to generate assembly for a file
-nas/msg_clean.cpp.s:
-	cd /home/liuxz/5G/UERANSIM_CoreTesting && $(MAKE) $(MAKESILENT) -f src/lib/CMakeFiles/common-lib.dir/build.make src/lib/CMakeFiles/common-lib.dir/nas/msg_clean.cpp.s
-.PHONY : nas/msg_clean.cpp.s
-
 nas/nas.o: nas/nas.cpp.o
 .PHONY : nas/nas.o
 
@@ -1519,9 +1495,6 @@ help:
 	@echo "... nas/msg.o"
 	@echo "... nas/msg.i"
 	@echo "... nas/msg.s"
-	@echo "... nas/msg_clean.o"
-	@echo "... nas/msg_clean.i"
-	@echo "... nas/msg_clean.s"
 	@echo "... nas/nas.o"
 	@echo "... nas/nas.i"
 	@echo "... nas/nas.s"

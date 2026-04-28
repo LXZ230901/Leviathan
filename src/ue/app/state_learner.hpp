@@ -43,7 +43,8 @@ enum class MsgType
     testMessage,
     rawMessage,
     corruptIe,
-    omitIe
+    omitIe,
+    setIeLength
 };
 
 enum class ShtType
@@ -119,7 +120,8 @@ class UeStateLearner
         {"testMessage"                , MsgType::testMessage                },
         {"rawMessage"                 , MsgType::rawMessage                 },
         {"corruptIe"                  , MsgType::corruptIe                  },
-        {"omitIe"                     , MsgType::omitIe                     }
+        {"omitIe"                     , MsgType::omitIe                     },
+        {"setIeLength"                , MsgType::setIeLength                }
     };
 
     std::unordered_map<std::string, ShtType> shtMap = 

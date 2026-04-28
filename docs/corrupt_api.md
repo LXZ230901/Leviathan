@@ -597,7 +597,7 @@ For messages where IEs are listed, note which IEs are mandatory vs optional — 
 
 ## MutateAgent Strategy Guidance
 
-### When to Use corruptValue vs mutate vs omitIE
+### When to Use corruptValue vs mutate vs omitIE vs setIeLength
 
 | Scenario | Primitive |
 |----------|-----------|
@@ -610,6 +610,9 @@ For messages where IEs are listed, note which IEs are mandatory vs optional — 
 | Missing mandatory field | `omitIE` to skip encoding a required IE (CWE-476) |
 | NULL dereference testing | `omitIE` on mandatory IEs to test parser robustness |
 | Optional IE removal | `omitIE` on optional IEs to simulate non-inclusion |
+| Length field fuzzing | `setIeLength` to fake IE4/IE6 length fields (CWE-119/120) |
+| Buffer overflow testing | `setIeLength` with oversized length values |
+| Length inconsistency | `setIeLength` to mismatch length field vs actual data |
 
 ### Suggested Mutation Strategies
 
@@ -623,3 +626,141 @@ For messages where IEs are listed, note which IEs are mandatory vs optional — 
 8. **NSSAI injection**: Corrupt requestedNSSAI with crafted S-NSSAI values to test slice authorization
 9. **Mixed corrupt+omit**: First `corruptIe` a field to an illegal value, then `omitIe` another field to test parser error recovery
 10. **All-mandatory removal**: Sequentially `omitIe` each mandatory IE to find which fields the core truly validates
+11. **Length field corruption**: Use `setIeLength` to fake IE4/IE6 length fields, causing buffer over-read or length inconsistency (CWE-119/120)
+
+---
+---
+
+# SetIELength Primitive API
+
+## Overview
+
+`setIELength` modifies the length field of length-prefixed IEs (IE4 and IE6 only) to an arbitrary value, causing buffer overflow/over-read and length inconsistency vulnerabilities (CWE-119/120). The actual content bytes are unchanged — only the length byte(s) are overwritten.
+
+IE1, IE2, and IE3 types are not length-prefixed and will be silently ignored (no-op) when `setIELength` is called on them.
+
+## Protocol
+
+### Command Format
+
+```
+setIeLength_<size>\n
+<msgName>:<ieIndex>:<fakeLen>
+```
+
+| Field | Description |
+|-------|-------------|
+| `size` | Number of bytes to read for the data line (recommend 100) |
+| `msgName` | Message name from the supported list |
+| `ieIndex` | 0-based IE index to target |
+| `fakeLen` | Integer value to write into the length field |
+
+### Example
+
+```
+setIeLength_30
+registrationRequest:1:0
+```
+
+This sets the length field of IE1 (mobileIdentity, an IE6 type) to 0, while the actual content bytes remain intact. The receiver will read the length field as 0 bytes, leading to a buffer inconsistency.
+
+```
+setIeLength_30
+securityModeCommand:2:255
+```
+
+This sets the length field of IE2 (replayedUeSecurityCapabilities, an IE4 type) to 255, claiming more data exists than actually encoded — a buffer over-read scenario.
+
+## IE Type Behavior
+
+| IE Type | Length Field Size | Method Called | Effect |
+|---------|-------------------|---------------|--------|
+| **IE4** | 1 byte (0-255) | `setIELength(ptr, fakeLen)` or `setIELengthOptional(opt, fakeLen)` | Length byte set to `fakeLen` (low 8 bits) |
+| **IE6** | 2 bytes (0-65535) | `setIELength(ptr, fakeLen)` or `setIELengthOptional(opt, fakeLen)` | Length bytes set to `fakeLen` (big-endian 16-bit) |
+| **IE1/IE2/IE3** | None | No-op (silently ignored) | Encoding unchanged — length field does not exist |
+
+### Fake Length vs Actual Data
+
+The `fakeLength` mechanism works at the encoding level:
+1. When `fakeLength >= 0`, `EncodeIe4`/`EncodeIe6` write `fakeLength` into the length field instead of the actual computed length
+2. The actual value bytes are still written to the stream (unchanged)
+3. This creates a deliberate inconsistency between the length field value and the actual data size
+4. When `fakeLength == -1` (default), the actual computed length is used normally
+
+### Optional IE Handling
+
+For optional IEs, `setIELengthOptional` only applies the fake length if the optional has a value (`has_value() == true`). If the optional is empty, the call is a no-op (no crash, no change).
+
+## Supported Message Types (Same as corruptIe/omitIe)
+
+All 14 MM message types stored in the state learner:
+
+- `registrationRequest` / `registrationRequestIMSI` / `registrationRequestGUTI`
+- `registrationComplete`
+- `deregistrationRequest`
+- `serviceRequest`
+- `securityModeReject`
+- `authenticationResponse` / `authenticationResponseEmpty`
+- `authenticationFailure`
+- `deregistrationAccept`
+- `securityModeComplete`
+- `identityResponse`
+- `configurationUpdateComplete`
+- `gmmStatus`
+- `ulNasTransport`
+
+## IE Index Reference (IE4/IE6 fields only)
+
+Only IE4 and IE6 types respond to `setIELength`. For IE1/IE2/IE3 fields, the call is silently ignored. Below are the IE4/IE6 fields per message:
+
+### RegistrationRequest (registrationRequest)
+
+| IE Index | Field | IE Type | Method |
+|----------|-------|---------|--------|
+| 1 | mobileIdentity | IE6 | setIELength |
+| 5 | mmCapability | IE4 (opt) | setIELengthOptional |
+| 6 | ueSecurityCapability | IE4 (opt) | setIELengthOptional |
+| 7 | requestedNSSAI | IE4 (opt) | setIELengthOptional |
+| 9 | s1UeNetworkCapability | IE4 (opt) | setIELengthOptional |
+| 10 | uplinkDataStatus | IE4 (opt) | setIELengthOptional |
+| 11 | pduSessionStatus | IE4 (opt) | setIELengthOptional |
+| 12 | ueStatus | IE4 (opt) | setIELengthOptional |
+| 13 | additionalGuti | IE6 (opt) | setIELengthOptional |
+| 14 | allowedPduSessionStatus | IE4 (opt) | setIELengthOptional |
+| 15 | uesUsageSetting | IE4 (opt) | setIELengthOptional |
+| 16 | requestedDrxParameters | IE4 (opt) | setIELengthOptional |
+| 17 | epsNasMessageContainer | IE6 (opt) | setIELengthOptional |
+| 18 | ladnIndication | IE6 (opt) | setIELengthOptional |
+| 19 | payloadContainer | IE6 (opt) | setIELengthOptional |
+| 20 | updateType | IE4 (opt) | setIELengthOptional |
+| 21 | nasMessageContainer | IE6 (opt) | setIELengthOptional |
+
+### SecurityModeCommand (securityModeCommand)
+
+| IE Index | Field | IE Type | Method |
+|----------|-------|---------|--------|
+| 2 | replayedUeSecurityCapabilities | IE4 | setIELength |
+| 5 | additional5gSecurityInformation | IE4 (opt) | setIELengthOptional |
+| 6 | eapMessage | IE6 (opt) | setIELengthOptional |
+| 7 | abba | IE4 (opt) | setIELengthOptional |
+| 8 | replayedS1UeNetworkCapability | IE4 (opt) | setIELengthOptional |
+
+## CWE-119/120 Test Values
+
+| Attack Type | setIeLength Target | Expected Effect |
+|-------------|-------------------|----------------|
+| IE4 zero-length | `fakeLen = 0` on any IE4 | Length byte = 0, actual data present (CWE-120: buffer overflow for writer) |
+| IE4 oversized | `fakeLen = 0xFF` on any IE4 | Claims 255 bytes, actual data much smaller (CWE-119: buffer over-read) |
+| IE6 max-length | `fakeLen = 0xFFFF` on any IE6 | Claims 65535 bytes (CWE-119: massive buffer over-read) |
+| IE6 under-sized | `fakeLen = 1` on large IE6 | Claims 1 byte for multi-byte value (parser reads incomplete field) |
+| Length/actual mismatch | `fakeLen` = actual * 2 | Reader allocates wrong buffer size, data mismatch |
+
+## When to Use setIeLength vs corruptValue vs omitIE
+
+| Scenario | Primitive |
+|----------|-----------|
+| Overwrite IE content | `corruptIe` — replaces the data bytes |
+| Change only the length | `setIeLength` — keeps data, alters length field |
+| IE4/IE6 length fuzzing | `setIeLength` — specifically targets length-prefixed IEs |
+| Missing field entirely | `omitIe` — removes IE from encoding |
+| IE1/IE3 content corruption | `corruptIe` — `setIeLength` has no effect on these types |
