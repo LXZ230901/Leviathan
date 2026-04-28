@@ -119,6 +119,19 @@ struct NasMessageMutator
             ptr->emplace(T());
         CorruptIe1(iei, ptr->value(), bytes);
     }
+
+    // omitIE primitives: remove IE from encoding (CWE-476, missing mandatory fields)
+    template <typename T>
+    inline void omitOptionalIE(std::optional<T> *ptr)
+    {
+        ptr->reset();
+    }
+
+    template <typename T>
+    inline void omitOptionalIE1(std::optional<T> *ptr)
+    {
+        ptr->reset();
+    }
 };
 
 }

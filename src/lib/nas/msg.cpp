@@ -59,6 +59,21 @@ void AuthenticationFailure::onCorrupt(NasMessageMutator &m, int ieIndex, const O
     }
 }
 
+void AuthenticationFailure::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&authenticationFailureParameter);
+        break;
+    default:
+        break;
+    }
+}
+
 
 AuthenticationReject::AuthenticationReject()
 {
@@ -84,6 +99,18 @@ void AuthenticationReject::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
     {
     case 0:
         m.corruptOptionalIE(0x78, &eapMessage, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&eapMessage);
         break;
     default:
         break;
@@ -150,6 +177,30 @@ void AuthenticationRequest::onCorrupt(NasMessageMutator &m, int ieIndex, const O
         break;
     case 4:
         m.corruptOptionalIE(0x78, &eapMessage, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE(&authParamRAND);
+        break;
+    case 3:
+        m.omitOptionalIE(&authParamAUTN);
+        break;
+    case 4:
+        m.omitOptionalIE(&eapMessage);
         break;
     default:
         break;
@@ -233,6 +284,24 @@ void AuthenticationResult::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
         break;
     case 2:
         m.corruptOptionalIE(0x38, &abba, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationResult::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE(&abba);
         break;
     default:
         break;
@@ -389,6 +458,66 @@ void ConfigurationUpdateCommand::onCorrupt(NasMessageMutator &m, int ieIndex, co
     }
 }
 
+void ConfigurationUpdateCommand::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE1(&configurationUpdateIndication);
+        break;
+    case 1:
+        m.omitOptionalIE(&guti);
+        break;
+    case 2:
+        m.omitOptionalIE(&taiList);
+        break;
+    case 3:
+        m.omitOptionalIE(&allowedNssai);
+        break;
+    case 4:
+        m.omitOptionalIE(&serviceAreaList);
+        break;
+    case 5:
+        m.omitOptionalIE(&networkFullName);
+        break;
+    case 6:
+        m.omitOptionalIE(&networkShortName);
+        break;
+    case 7:
+        m.omitOptionalIE(&localTimeZone);
+        break;
+    case 8:
+        m.omitOptionalIE(&universalTimeAndLocalTimeZone);
+        break;
+    case 9:
+        m.omitOptionalIE(&networkDaylightSavingTime);
+        break;
+    case 10:
+        m.omitOptionalIE(&ladnInformation);
+        break;
+    case 11:
+        m.omitOptionalIE1(&micoIndication);
+        break;
+    case 12:
+        m.omitOptionalIE1(&networkSlicingIndication);
+        break;
+    case 13:
+        m.omitOptionalIE(&configuredNssai);
+        break;
+    case 14:
+        m.omitOptionalIE(&rejectedNssai);
+        break;
+    case 15:
+        m.omitOptionalIE(&operatorDefinedAccessCategoryDefinitions);
+        break;
+    case 16:
+        m.omitOptionalIE1(&smsIndication);
+        break;
+    default:
+        break;
+    }
+}
+
 
 ConfigurationUpdateComplete::ConfigurationUpdateComplete()
 {
@@ -410,6 +539,15 @@ void ConfigurationUpdateComplete::onCorrupt(NasMessageMutator &m, int ieIndex, c
     switch (ieIndex)
     {
     // No IEs to corrupt
+    default:
+        break;
+    }
+}
+
+void ConfigurationUpdateComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
     default:
         break;
     }
@@ -441,6 +579,15 @@ void DeRegistrationAcceptUeOriginating::onCorrupt(NasMessageMutator &m, int ieIn
     }
 }
 
+void DeRegistrationAcceptUeOriginating::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    default:
+        break;
+    }
+}
+
 
 DeRegistrationAcceptUeTerminated::DeRegistrationAcceptUeTerminated()
 {
@@ -462,6 +609,15 @@ void DeRegistrationAcceptUeTerminated::onCorrupt(NasMessageMutator &m, int ieInd
     switch (ieIndex)
     {
     // No IEs to corrupt
+    default:
+        break;
+    }
+}
+
+void DeRegistrationAcceptUeTerminated::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
     default:
         break;
     }
@@ -507,6 +663,21 @@ void DeRegistrationRequestUeOriginating::onCorrupt(NasMessageMutator &m, int ieI
         break;
     case 1:
         m.corruptValue(&mobileIdentity, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void DeRegistrationRequestUeOriginating::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
         break;
     default:
         break;
@@ -559,6 +730,24 @@ void DeRegistrationRequestUeTerminated::onCorrupt(NasMessageMutator &m, int ieIn
         break;
     case 2:
         m.corruptOptionalIE(0x5F, &t3346Value, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void DeRegistrationRequestUeTerminated::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&mmCause);
+        break;
+    case 2:
+        m.omitOptionalIE(&t3346Value);
         break;
     default:
         break;
@@ -638,6 +827,33 @@ void DlNasTransport::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStr
     }
 }
 
+void DlNasTransport::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE(&pduSessionId);
+        break;
+    case 3:
+        m.omitOptionalIE(&additionalInformation);
+        break;
+    case 4:
+        m.omitOptionalIE(&mmCause);
+        break;
+    case 5:
+        m.omitOptionalIE(&backOffTimerValue);
+        break;
+    default:
+        break;
+    }
+}
+
 
 FiveGMmStatus::FiveGMmStatus()
 {
@@ -669,6 +885,18 @@ void FiveGMmStatus::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStri
     }
 }
 
+void FiveGMmStatus::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
 
 FiveGSmStatus::FiveGSmStatus()
 {
@@ -693,6 +921,18 @@ void FiveGSmStatus::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStri
     {
     case 0:
         m.corruptValue(&smCause, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void FiveGSmStatus::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
         break;
     default:
         break;
@@ -730,6 +970,18 @@ void IdentityRequest::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetSt
     }
 }
 
+void IdentityRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
 
 IdentityResponse::IdentityResponse()
 {
@@ -755,6 +1007,18 @@ void IdentityResponse::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetS
     {
     case 0:
         m.corruptValue(&mobileIdentity, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void IdentityResponse::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
         break;
     default:
         break;
@@ -792,6 +1056,18 @@ void Notification::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStrin
     }
 }
 
+void Notification::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    default:
+        break;
+    }
+}
+
 
 NotificationResponse::NotificationResponse()
 {
@@ -817,6 +1093,18 @@ void NotificationResponse::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
     {
     case 0:
         m.corruptOptionalIE(0x50, &pduSessionStatus, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void NotificationResponse::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&pduSessionStatus);
         break;
     default:
         break;
@@ -867,6 +1155,21 @@ void PduSessionAuthenticationCommand::onCorrupt(NasMessageMutator &m, int ieInde
     }
 }
 
+void PduSessionAuthenticationCommand::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionAuthenticationComplete::PduSessionAuthenticationComplete()
 {
@@ -911,6 +1214,21 @@ void PduSessionAuthenticationComplete::onCorrupt(NasMessageMutator &m, int ieInd
     }
 }
 
+void PduSessionAuthenticationComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionAuthenticationResult::PduSessionAuthenticationResult()
 {
@@ -949,6 +1267,21 @@ void PduSessionAuthenticationResult::onCorrupt(NasMessageMutator &m, int ieIndex
         break;
     case 1:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionAuthenticationResult::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1076,6 +1409,54 @@ void PduSessionEstablishmentAccept::onCorrupt(NasMessageMutator &m, int ieIndex,
     }
 }
 
+void PduSessionEstablishmentAccept::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        this->omitMandatory.insert(2);
+        break;
+    case 3:
+        m.omitOptionalIE(&smCause);
+        break;
+    case 4:
+        m.omitOptionalIE(&pduAddress);
+        break;
+    case 5:
+        m.omitOptionalIE(&rqTimerValue);
+        break;
+    case 6:
+        m.omitOptionalIE(&sNssai);
+        break;
+    case 7:
+        m.omitOptionalIE1(&alwaysOnPduSessionIndication);
+        break;
+    case 8:
+        m.omitOptionalIE(&mappedEpsBearerContexts);
+        break;
+    case 9:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 10:
+        m.omitOptionalIE(&authorizedQoSFlowDescriptions);
+        break;
+    case 11:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    case 12:
+        m.omitOptionalIE(&dnn);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionEstablishmentReject::PduSessionEstablishmentReject()
 {
@@ -1135,6 +1516,30 @@ void PduSessionEstablishmentReject::onCorrupt(NasMessageMutator &m, int ieIndex,
         break;
     case 4:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionEstablishmentReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&backOffTimerValue);
+        break;
+    case 2:
+        m.omitOptionalIE1(&allowedSscMode);
+        break;
+    case 3:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 4:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1227,6 +1632,39 @@ void PduSessionEstablishmentRequest::onCorrupt(NasMessageMutator &m, int ieIndex
     }
 }
 
+void PduSessionEstablishmentRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE1(&pduSessionType);
+        break;
+    case 2:
+        m.omitOptionalIE1(&sscMode);
+        break;
+    case 3:
+        m.omitOptionalIE(&smCapability);
+        break;
+    case 4:
+        m.omitOptionalIE(&maximumNumberOfSupportedPacketFilters);
+        break;
+    case 5:
+        m.omitOptionalIE1(&alwaysOnPduSessionRequested);
+        break;
+    case 6:
+        m.omitOptionalIE(&smPduDnRequestContainer);
+        break;
+    case 7:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationCommand::PduSessionModificationCommand()
 {
@@ -1313,6 +1751,39 @@ void PduSessionModificationCommand::onCorrupt(NasMessageMutator &m, int ieIndex,
     }
 }
 
+void PduSessionModificationCommand::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&smCause);
+        break;
+    case 1:
+        m.omitOptionalIE(&sessionAmbr);
+        break;
+    case 2:
+        m.omitOptionalIE(&rqTimerValue);
+        break;
+    case 3:
+        m.omitOptionalIE1(&alwaysOnPduSessionIndication);
+        break;
+    case 4:
+        m.omitOptionalIE(&authorizedQoSRules);
+        break;
+    case 5:
+        m.omitOptionalIE(&mappedEpsBearerContexts);
+        break;
+    case 6:
+        m.omitOptionalIE(&authorizedQoSFlowDescriptions);
+        break;
+    case 7:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationCommandReject::PduSessionModificationCommandReject()
 {
@@ -1357,6 +1828,21 @@ void PduSessionModificationCommandReject::onCorrupt(NasMessageMutator &m, int ie
     }
 }
 
+void PduSessionModificationCommandReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionModificationComplete::PduSessionModificationComplete()
 {
@@ -1381,6 +1867,18 @@ void PduSessionModificationComplete::onCorrupt(NasMessageMutator &m, int ieIndex
     {
     case 0:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionModificationComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1432,6 +1930,24 @@ void PduSessionModificationReject::onCorrupt(NasMessageMutator &m, int ieIndex, 
         break;
     case 2:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionModificationReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&backOffTimerValue);
+        break;
+    case 2:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1531,6 +2047,42 @@ void PduSessionModificationRequest::onCorrupt(NasMessageMutator &m, int ieIndex,
     }
 }
 
+void PduSessionModificationRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&smCapability);
+        break;
+    case 1:
+        m.omitOptionalIE(&smCause);
+        break;
+    case 2:
+        m.omitOptionalIE(&maximumNumberOfSupportedPacketFilters);
+        break;
+    case 3:
+        m.omitOptionalIE1(&alwaysOnPduSessionRequested);
+        break;
+    case 4:
+        m.omitOptionalIE(&integrityProtectionMaximumDataRate);
+        break;
+    case 5:
+        m.omitOptionalIE(&requestedQosRules);
+        break;
+    case 6:
+        m.omitOptionalIE(&requestedQosFlowDescriptions);
+        break;
+    case 7:
+        m.omitOptionalIE(&mappedEpsBearerContexts);
+        break;
+    case 8:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseCommand::PduSessionReleaseCommand()
 {
@@ -1589,6 +2141,27 @@ void PduSessionReleaseCommand::onCorrupt(NasMessageMutator &m, int ieIndex, cons
     }
 }
 
+void PduSessionReleaseCommand::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&backOffTimerValue);
+        break;
+    case 2:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 3:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseComplete::PduSessionReleaseComplete()
 {
@@ -1627,6 +2200,21 @@ void PduSessionReleaseComplete::onCorrupt(NasMessageMutator &m, int ieIndex, con
         break;
     case 1:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionReleaseComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&smCause);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1677,6 +2265,21 @@ void PduSessionReleaseReject::onCorrupt(NasMessageMutator &m, int ieIndex, const
     }
 }
 
+void PduSessionReleaseReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
+        break;
+    default:
+        break;
+    }
+}
+
 
 PduSessionReleaseRequest::PduSessionReleaseRequest()
 {
@@ -1715,6 +2318,21 @@ void PduSessionReleaseRequest::onCorrupt(NasMessageMutator &m, int ieIndex, cons
         break;
     case 1:
         m.corruptOptionalIE(0x7B, &extendedProtocolConfigurationOptions, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void PduSessionReleaseRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&smCause);
+        break;
+    case 1:
+        m.omitOptionalIE(&extendedProtocolConfigurationOptions);
         break;
     default:
         break;
@@ -1927,6 +2545,90 @@ void RegistrationAccept::onCorrupt(NasMessageMutator &m, int ieIndex, const Octe
     }
 }
 
+void RegistrationAccept::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE1(&networkSlicingIndication);
+        break;
+    case 2:
+        m.omitOptionalIE1(&nssaiInclusionMode);
+        break;
+    case 3:
+        m.omitOptionalIE1(&micoIndication);
+        break;
+    case 4:
+        m.omitOptionalIE(&mobileIdentity);
+        break;
+    case 5:
+        m.omitOptionalIE(&equivalentPLMNs);
+        break;
+    case 6:
+        m.omitOptionalIE(&taiList);
+        break;
+    case 7:
+        m.omitOptionalIE(&allowedNSSAI);
+        break;
+    case 8:
+        m.omitOptionalIE(&rejectedNSSAI);
+        break;
+    case 9:
+        m.omitOptionalIE(&configuredNSSAI);
+        break;
+    case 10:
+        m.omitOptionalIE(&networkFeatureSupport);
+        break;
+    case 11:
+        m.omitOptionalIE(&pduSessionStatus);
+        break;
+    case 12:
+        m.omitOptionalIE(&pduSessionReactivationResult);
+        break;
+    case 13:
+        m.omitOptionalIE(&pduSessionReactivationResultErrorCause);
+        break;
+    case 14:
+        m.omitOptionalIE(&ladnInformation);
+        break;
+    case 15:
+        m.omitOptionalIE(&serviceAreaList);
+        break;
+    case 16:
+        m.omitOptionalIE(&t3512Value);
+        break;
+    case 17:
+        m.omitOptionalIE(&non3gppDeRegistrationTimerValue);
+        break;
+    case 18:
+        m.omitOptionalIE(&t3502Value);
+        break;
+    case 19:
+        m.omitOptionalIE(&emergencyNumberList);
+        break;
+    case 20:
+        m.omitOptionalIE(&extendedEmergencyNumberList);
+        break;
+    case 21:
+        m.omitOptionalIE(&sorTransparentContainer);
+        break;
+    case 22:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 23:
+        m.omitOptionalIE(&operatorDefinedAccessCategoryDefinitions);
+        break;
+    case 24:
+        m.omitOptionalIE(&negotiatedDrxParameters);
+        break;
+    default:
+        break;
+    }
+}
+
 
 RegistrationComplete::RegistrationComplete()
 {
@@ -1952,6 +2654,18 @@ void RegistrationComplete::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
     {
     case 0:
         m.corruptOptionalIE(0x73, &sorTransparentContainer, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void RegistrationComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&sorTransparentContainer);
         break;
     default:
         break;
@@ -2011,6 +2725,27 @@ void RegistrationReject::onCorrupt(NasMessageMutator &m, int ieIndex, const Octe
         break;
     case 3:
         m.corruptOptionalIE(0x78, &eapMessage, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void RegistrationReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&t3346value);
+        break;
+    case 2:
+        m.omitOptionalIE(&t3502value);
+        break;
+    case 3:
+        m.omitOptionalIE(&eapMessage);
         break;
     default:
         break;
@@ -2203,6 +2938,81 @@ void RegistrationRequest::onCorrupt(NasMessageMutator &m, int ieIndex, const Oct
     }
 }
 
+void RegistrationRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE1(&nonCurrentNgKsi);
+        break;
+    case 3:
+        m.omitOptionalIE1(&micoIndication);
+        break;
+    case 4:
+        m.omitOptionalIE1(&networkSlicingIndication);
+        break;
+    case 5:
+        m.omitOptionalIE(&mmCapability);
+        break;
+    case 6:
+        m.omitOptionalIE(&ueSecurityCapability);
+        break;
+    case 7:
+        m.omitOptionalIE(&requestedNSSAI);
+        break;
+    case 8:
+        m.omitOptionalIE(&lastVisitedRegisteredTai);
+        break;
+    case 9:
+        m.omitOptionalIE(&s1UeNetworkCapability);
+        break;
+    case 10:
+        m.omitOptionalIE(&uplinkDataStatus);
+        break;
+    case 11:
+        m.omitOptionalIE(&pduSessionStatus);
+        break;
+    case 12:
+        m.omitOptionalIE(&ueStatus);
+        break;
+    case 13:
+        m.omitOptionalIE(&additionalGuti);
+        break;
+    case 14:
+        m.omitOptionalIE(&allowedPduSessionStatus);
+        break;
+    case 15:
+        m.omitOptionalIE(&uesUsageSetting);
+        break;
+    case 16:
+        m.omitOptionalIE(&requestedDrxParameters);
+        break;
+    case 17:
+        m.omitOptionalIE(&epsNasMessageContainer);
+        break;
+    case 18:
+        m.omitOptionalIE(&ladnIndication);
+        break;
+    case 19:
+        m.omitOptionalIE(&payloadContainer);
+        break;
+    case 20:
+        m.omitOptionalIE(&updateType);
+        break;
+    case 21:
+        m.omitOptionalIE(&nasMessageContainer);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeCommand::SecurityModeCommand()
 {
@@ -2297,6 +3107,42 @@ void SecurityModeCommand::onCorrupt(NasMessageMutator &m, int ieIndex, const Oct
     }
 }
 
+void SecurityModeCommand::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        this->omitMandatory.insert(2);
+        break;
+    case 3:
+        m.omitOptionalIE1(&imeiSvRequest);
+        break;
+    case 4:
+        m.omitOptionalIE(&epsNasSecurityAlgorithms);
+        break;
+    case 5:
+        m.omitOptionalIE(&additional5gSecurityInformation);
+        break;
+    case 6:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    case 7:
+        m.omitOptionalIE(&abba);
+        break;
+    case 8:
+        m.omitOptionalIE(&replayedS1UeNetworkCapability);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeComplete::SecurityModeComplete()
 {
@@ -2342,6 +3188,21 @@ void SecurityModeComplete::onCorrupt(NasMessageMutator &m, int ieIndex, const Oc
     }
 }
 
+void SecurityModeComplete::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&imeiSv);
+        break;
+    case 1:
+        m.omitOptionalIE(&nasMessageContainer);
+        break;
+    default:
+        break;
+    }
+}
+
 
 SecurityModeReject::SecurityModeReject()
 {
@@ -2367,6 +3228,18 @@ void SecurityModeReject::onCorrupt(NasMessageMutator &m, int ieIndex, const Octe
     {
     case 0:
         m.corruptValue(&mmCause, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void SecurityModeReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
         break;
     default:
         break;
@@ -2432,6 +3305,27 @@ void ServiceAccept::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStri
     }
 }
 
+void ServiceAccept::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&pduSessionStatus);
+        break;
+    case 1:
+        m.omitOptionalIE(&pduSessionReactivationResult);
+        break;
+    case 2:
+        m.omitOptionalIE(&pduSessionReactivationResultErrorCause);
+        break;
+    case 3:
+        m.omitOptionalIE(&eapMessage);
+        break;
+    default:
+        break;
+    }
+}
+
 
 ServiceReject::ServiceReject()
 {
@@ -2485,6 +3379,27 @@ void ServiceReject::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStri
         break;
     case 3:
         m.corruptOptionalIE(0x78, &eapMessage, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void ServiceReject::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        m.omitOptionalIE(&pduSessionStatus);
+        break;
+    case 2:
+        m.omitOptionalIE(&t3346Value);
+        break;
+    case 3:
+        m.omitOptionalIE(&eapMessage);
         break;
     default:
         break;
@@ -2558,6 +3473,33 @@ void ServiceRequest::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStr
         break;
     case 5:
         m.corruptOptionalIE(0x71, &nasMessageContainer, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void ServiceRequest::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE(&uplinkDataStatus);
+        break;
+    case 3:
+        m.omitOptionalIE(&pduSessionStatus);
+        break;
+    case 4:
+        m.omitOptionalIE(&allowedPduSessionStatus);
+        break;
+    case 5:
+        m.omitOptionalIE(&nasMessageContainer);
         break;
     default:
         break;
@@ -2651,6 +3593,39 @@ void UlNasTransport::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetStr
     }
 }
 
+void UlNasTransport::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        this->omitMandatory.insert(0);
+        break;
+    case 1:
+        this->omitMandatory.insert(1);
+        break;
+    case 2:
+        m.omitOptionalIE(&pduSessionId);
+        break;
+    case 3:
+        m.omitOptionalIE(&oldPduSessionId);
+        break;
+    case 4:
+        m.omitOptionalIE1(&requestType);
+        break;
+    case 5:
+        m.omitOptionalIE(&sNssai);
+        break;
+    case 6:
+        m.omitOptionalIE(&dnn);
+        break;
+    case 7:
+        m.omitOptionalIE(&additionalInformation);
+        break;
+    default:
+        break;
+    }
+}
+
 
 void AuthenticationResponse::onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes)
 {
@@ -2661,6 +3636,21 @@ void AuthenticationResponse::onCorrupt(NasMessageMutator &m, int ieIndex, const 
         break;
     case 1:
         m.corruptOptionalIE(0x78, &eapMessage, bytes);
+        break;
+    default:
+        break;
+    }
+}
+
+void AuthenticationResponse::onOmit(NasMessageMutator &m, int ieIndex)
+{
+    switch (ieIndex)
+    {
+    case 0:
+        m.omitOptionalIE(&authenticationResponseParameter);
+        break;
+    case 1:
+        m.omitOptionalIE(&eapMessage);
         break;
     default:
         break;

@@ -514,9 +514,90 @@ Arbitrary raw bytes. Structure depends on the IE:
 
 ---
 
+---
+---
+
+# OmitIE Primitive API
+
+## Overview
+
+`omitIE` removes an Information Element from a NAS message before encoding. For mandatory IEs, the IE is skipped during encoding (missing mandatory field — CWE-476). For optional IEs, the field is reset to empty (simulating non-inclusion).
+
+## Protocol
+
+### Command Format
+
+```
+omitIe_<size>\n
+<msgName>:<ieIndex>
+```
+
+| Field | Description |
+|-------|-------------|
+| `size` | Number of bytes to read for the data line (recommend 100) |
+| `msgName` | Message name from the supported list |
+| `ieIndex` | 0-based IE index to omit |
+
+### Example
+
+```
+omitIe_20
+registrationRequest:0
+```
+
+This removes the first mandatory IE (nasKeySetIdentifier + registrationType compound IE1) from RegistrationRequest, causing the encoded message to lack a required field.
+
+## Supported Message Types (Same as corruptIe)
+
+All 14 MM message types stored in the state learner:
+
+- `registrationRequest` / `registrationRequestIMSI` / `registrationRequestGUTI`
+- `registrationComplete`
+- `deregistrationRequest`
+- `serviceRequest`
+- `securityModeReject`
+- `authenticationResponse` / `authenticationResponseEmpty`
+- `authenticationFailure`
+- `deregistrationAccept`
+- `securityModeComplete`
+- `identityResponse`
+- `configurationUpdateComplete`
+- `gmmStatus`
+- `ulNasTransport`
+
+## IE Index Reference
+
+Same IE index tables as corruptValue (see per-message tables above). The IE index corresponds to the position in the `onBuild` declaration order: mandatory IEs first, then optional IEs.
+
+### Behavior by IE Type
+
+| IE Type | onBuild method | Omit Behavior |
+|---------|---------------|---------------|
+| Mandatory IE2/IE3/IE4/IE6 | `b.mandatoryIE(&field)` | Skips encoding entirely — field value still present in struct but not written to wire |
+| Mandatory IE1 (single) | `b.mandatoryIE1(&field)` | Skips encoding — entire half-octet IE omitted |
+| Mandatory IE1 (compound) | `b.mandatoryIE1(&f1, &f2)` | Skips encoding — entire octet omitted |
+| Optional IE | `b.optionalIE(iei, &field)` | `std::optional::reset()` — has_value() becomes false |
+| Optional IE1 | `b.optionalIE1(iei, &field)` | `std::optional::reset()` — has_value() becomes false |
+
+### IEC Type Ambiguity Notice
+
+For messages where IEs are listed, note which IEs are mandatory vs optional — the omit behavior differs. For mandatory IEs, the encoder skips them entirely. For optional IEs, the field is reset to empty (same effect as never having set it).
+
+## CWE-476 Test Values
+
+| Attack Type | omitIE Target | Expected Effect |
+|-------------|---------------|----------------|
+| Missing mandatory IE1 (4-bit) | IE0 of any message with mandatory IE1 | Encoded without first half-octet field |
+| Missing mandatory IE (variable) | IE0/IE1 of messages with mandatory compound IEs | Entire mandatory IE omitted from encoding |
+| Missing optional IE | Any optional IE index | IE not present in encoded message |
+| Compound IE removal | IE0 of RegistrationRequest | Both ngKSI and registrationType removed |
+
+---
+---
+
 ## MutateAgent Strategy Guidance
 
-### When to Use corruptValue vs mutate
+### When to Use corruptValue vs mutate vs omitIE
 
 | Scenario | Primitive |
 |----------|-----------|
@@ -526,6 +607,9 @@ Arbitrary raw bytes. Structure depends on the IE:
 | Enum fuzzing | `corruptValue` IE3 mmCause with 0x00-0xFF sweep |
 | Identity spoofing | `corruptValue` mobileIdentity fields |
 | Optional IE injection | `corruptOptionalIE` auto-creates the IE |
+| Missing mandatory field | `omitIE` to skip encoding a required IE (CWE-476) |
+| NULL dereference testing | `omitIE` on mandatory IEs to test parser robustness |
+| Optional IE removal | `omitIE` on optional IEs to simulate non-inclusion |
 
 ### Suggested Mutation Strategies
 
@@ -534,5 +618,8 @@ Arbitrary raw bytes. Structure depends on the IE:
 3. **Length attacks**: For IE4/IE6 fields, inject overly long or zero-length data
 4. **Bit-level corruption**: For IE1 fields, sweep 0x0-0xF to test all bit combinations
 5. **Mandatory field nullification**: Set mandatory IE bytes to empty
-6. **Security bypass**: Set ngKSI to NOT_AVAILABLE_OR_RESERVED (0x07) to bypass security context checks
-7. **NSSAI injection**: Corrupt requestedNSSAI with crafted S-NSSAI values to test slice authorization
+6. **Mandatory field omission**: Use `omitIE` to skip mandatory IE encoding entirely (stronger than nullification)
+7. **Security bypass**: Set ngKSI to NOT_AVAILABLE_OR_RESERVED (0x07) to bypass security context checks
+8. **NSSAI injection**: Corrupt requestedNSSAI with crafted S-NSSAI values to test slice authorization
+9. **Mixed corrupt+omit**: First `corruptIe` a field to an illegal value, then `omitIe` another field to test parser error recovery
+10. **All-mandatory removal**: Sequentially `omitIe` each mandatory IE to find which fields the core truly validates

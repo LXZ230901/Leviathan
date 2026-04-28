@@ -811,6 +811,107 @@ void UeStateLearner::execute_command(std::string msg)
             enableFuzzing = true;
             break;}
 
+        case MsgType::omitIe:{
+            enableFuzzing = false;
+            notify_response("OK");
+            std::cout << "omitIe" << std::endl;
+            // get size of binary message
+            size_t size = 1000;
+            if (index != std::string::npos)
+                size = std::stoi(sub_str);
+            // read omitIe data: <msgName>:<ieIndex>
+            OctetString raw = recv_incoming_message(size);
+            std::string rawStr((const char*)raw.data(), raw.length());
+            size_t c1 = rawStr.find_first_of(":");
+            if (c1 == std::string::npos)
+            {
+                notify_response("invalid omitIe format, expected msgName:ieIndex");
+                enableFuzzing = true;
+                break;
+            }
+            std::string msgName = rawStr.substr(0, c1);
+            int ieIndex = std::stoi(rawStr.substr(c1 + 1));
+            std::cout << "omitIe: msg=" << msgName << " ieIndex=" << ieIndex << std::endl;
+
+            if (msgMap.count(msgName) == 0)
+            {
+                notify_response("unknown message name");
+                enableFuzzing = true;
+                break;
+            }
+
+            MsgType targetType = msgMap[msgName];
+            nas::NasMessageMutator mutator;
+
+            // dispatch to the stored message and call onOmit
+            switch (targetType)
+            {
+            case MsgType::registrationRequestIMSI:
+                registrationRequestIMSI.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(registrationRequestIMSI);
+                break;
+            case MsgType::registrationRequestGUTI:
+                registrationRequestGUTI.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(registrationRequestGUTI);
+                break;
+            case MsgType::registrationComplete:{
+                auto msg = nas::RegistrationComplete{};
+                msg.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(msg);
+                break;}
+            case MsgType::deregistrationRequest:
+                deregistrationRequest.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(deregistrationRequest);
+                break;
+            case MsgType::serviceRequest:
+                serviceRequest.onOmit(mutator, ieIndex);
+                mm->sendServiceRequest(EServiceReqCause::IDLE_UPLINK_SIGNAL_PENDING);
+                mm->sendNasMessage(serviceRequest);
+                break;
+            case MsgType::securityModeReject:
+                securityModeReject.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(securityModeReject);
+                break;
+            case MsgType::authenticationResponse:
+                authenticationResponse.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(authenticationResponse);
+                break;
+            case MsgType::authenticationFailure:
+                authenticationFailure.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(authenticationFailure);
+                break;
+            case MsgType::securityModeComplete:
+                securityModeComplete.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(securityModeComplete);
+                break;
+            case MsgType::identityResponse:
+                identityResponse.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(identityResponse);
+                break;
+            case MsgType::configurationUpdateComplete:{
+                auto msg = nas::ConfigurationUpdateComplete{};
+                msg.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(msg);
+                break;}
+            case MsgType::gmmStatus:
+                gmmStatus.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(gmmStatus);
+                break;
+            case MsgType::ulNasTransport:
+                ulNasTransport.onOmit(mutator, ieIndex);
+                mm->sendNasMessage(ulNasTransport);
+                break;
+            // SM messages not directly supported for omitIe
+            // (inner SM message must be decoded from UlNasTransport wrapper first -- TODO)
+            default:
+                notify_response("message type not supported for omitIe");
+                break;
+            }
+
+            notify_response("OK");
+            enableFuzzing = true;
+            break;}
+
         default:
             std::cout << "Unknown fuzzing message name" << std::endl;
             notify_response("Unknown fuzzing message name");

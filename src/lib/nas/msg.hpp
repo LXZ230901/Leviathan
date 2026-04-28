@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <set>
+
 #include "ie1.hpp"
 #include "ie2.hpp"
 #include "ie3.hpp"
@@ -27,24 +29,36 @@ struct NasMessageBuilder
     std::vector<std::function<void(const OctetView &)>> mandatoryDecoders{};
     std::unordered_map<int, std::function<void(const OctetView &)>> optionalDecoders{};
 
+    const std::set<int> *omitMask = nullptr;
+    int mandatoryIndex = 0;
+
+    NasMessageBuilder() = default;
+    explicit NasMessageBuilder(const std::set<int> &mask) : omitMask(&mask) {}
+
     template <typename T>
     inline void mandatoryIE(T *ptr)
     {
-        mandatoryEncoders.push_back([ptr](OctetString &stream) { Encode2346(*ptr, stream); });
+        int idx = mandatoryIndex++;
+        if (!omitMask || !omitMask->count(idx))
+            mandatoryEncoders.push_back([ptr](OctetString &stream) { Encode2346(*ptr, stream); });
         mandatoryDecoders.push_back([ptr](const OctetView &stream) { *ptr = DecodeIe2346<T>(stream); });
     }
 
     template <typename T>
     inline void mandatoryIE1(T *ptr)
     {
-        mandatoryEncoders.push_back([ptr](OctetString &stream) { EncodeIe1(0, *ptr, stream); });
+        int idx = mandatoryIndex++;
+        if (!omitMask || !omitMask->count(idx))
+            mandatoryEncoders.push_back([ptr](OctetString &stream) { EncodeIe1(0, *ptr, stream); });
         mandatoryDecoders.push_back([ptr](const OctetView &stream) { *ptr = DecodeIe1<T>(stream); });
     }
 
     template <typename T, typename U>
     inline void mandatoryIE1(T *ptr1, U *ptr2)
     {
-        mandatoryEncoders.push_back([ptr1, ptr2](OctetString &stream) { EncodeIe1(*ptr1, *ptr2, stream); });
+        int idx = mandatoryIndex++;
+        if (!omitMask || !omitMask->count(idx))
+            mandatoryEncoders.push_back([ptr1, ptr2](OctetString &stream) { EncodeIe1(*ptr1, *ptr2, stream); });
         mandatoryDecoders.push_back([ptr1, ptr2](const OctetView &stream) {
             int octet = stream.readI();
             *ptr1 = T::Decode((octet >> 4) & 0xF);
@@ -82,6 +96,7 @@ struct NasMessageBuilder
 struct NasMessage
 {
     EExtendedProtocolDiscriminator epd{};
+    std::set<int> omitMandatory{};
 
   protected:
     NasMessage() = default;
@@ -134,6 +149,7 @@ struct AuthenticationFailure : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct AuthenticationReject : PlainMmMessage
@@ -144,6 +160,7 @@ struct AuthenticationReject : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct AuthenticationRequest : PlainMmMessage
@@ -158,6 +175,7 @@ struct AuthenticationRequest : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct AuthenticationResponse : PlainMmMessage
@@ -169,6 +187,7 @@ struct AuthenticationResponse : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct AuthenticationResult : PlainMmMessage
@@ -181,6 +200,7 @@ struct AuthenticationResult : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct ConfigurationUpdateCommand : PlainMmMessage
@@ -207,6 +227,7 @@ struct ConfigurationUpdateCommand : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct ConfigurationUpdateComplete : PlainMmMessage
@@ -215,6 +236,7 @@ struct ConfigurationUpdateComplete : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct DeRegistrationAcceptUeOriginating : PlainMmMessage
@@ -223,6 +245,7 @@ struct DeRegistrationAcceptUeOriginating : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct DeRegistrationAcceptUeTerminated : PlainMmMessage
@@ -231,6 +254,7 @@ struct DeRegistrationAcceptUeTerminated : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct DeRegistrationRequestUeOriginating : PlainMmMessage
@@ -243,6 +267,7 @@ struct DeRegistrationRequestUeOriginating : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct DeRegistrationRequestUeTerminated : PlainMmMessage
@@ -255,6 +280,7 @@ struct DeRegistrationRequestUeTerminated : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct DlNasTransport : PlainMmMessage
@@ -270,6 +296,7 @@ struct DlNasTransport : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct FiveGMmStatus : PlainMmMessage
@@ -280,6 +307,7 @@ struct FiveGMmStatus : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct FiveGSmStatus : SmMessage
@@ -290,6 +318,7 @@ struct FiveGSmStatus : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct IdentityRequest : PlainMmMessage
@@ -300,6 +329,7 @@ struct IdentityRequest : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct IdentityResponse : PlainMmMessage
@@ -310,6 +340,7 @@ struct IdentityResponse : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct Notification : PlainMmMessage
@@ -320,6 +351,7 @@ struct Notification : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct NotificationResponse : PlainMmMessage
@@ -330,6 +362,7 @@ struct NotificationResponse : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionAuthenticationCommand : SmMessage
@@ -341,6 +374,7 @@ struct PduSessionAuthenticationCommand : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionAuthenticationComplete : SmMessage
@@ -352,6 +386,7 @@ struct PduSessionAuthenticationComplete : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionAuthenticationResult : SmMessage
@@ -363,6 +398,7 @@ struct PduSessionAuthenticationResult : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionEstablishmentAccept : SmMessage
@@ -386,6 +422,7 @@ struct PduSessionEstablishmentAccept : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionEstablishmentReject : SmMessage
@@ -400,6 +437,7 @@ struct PduSessionEstablishmentReject : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionEstablishmentRequest : SmMessage
@@ -417,6 +455,7 @@ struct PduSessionEstablishmentRequest : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionModificationCommand : SmMessage
@@ -434,6 +473,7 @@ struct PduSessionModificationCommand : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionModificationCommandReject : SmMessage
@@ -445,6 +485,7 @@ struct PduSessionModificationCommandReject : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionModificationComplete : SmMessage
@@ -455,6 +496,7 @@ struct PduSessionModificationComplete : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionModificationReject : SmMessage
@@ -467,6 +509,7 @@ struct PduSessionModificationReject : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionModificationRequest : SmMessage
@@ -485,6 +528,7 @@ struct PduSessionModificationRequest : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionReleaseCommand : SmMessage
@@ -498,6 +542,7 @@ struct PduSessionReleaseCommand : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionReleaseComplete : SmMessage
@@ -509,6 +554,7 @@ struct PduSessionReleaseComplete : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionReleaseReject : SmMessage
@@ -520,6 +566,7 @@ struct PduSessionReleaseReject : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct PduSessionReleaseRequest : SmMessage
@@ -531,6 +578,7 @@ struct PduSessionReleaseRequest : SmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct RegistrationAccept : PlainMmMessage
@@ -565,6 +613,7 @@ struct RegistrationAccept : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct RegistrationComplete : PlainMmMessage
@@ -575,6 +624,7 @@ struct RegistrationComplete : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct RegistrationReject : PlainMmMessage
@@ -588,6 +638,7 @@ struct RegistrationReject : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct RegistrationRequest : PlainMmMessage
@@ -620,6 +671,7 @@ struct RegistrationRequest : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct SecurityModeCommand : PlainMmMessage
@@ -641,6 +693,7 @@ struct SecurityModeCommand : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct SecurityModeComplete : PlainMmMessage
@@ -652,6 +705,7 @@ struct SecurityModeComplete : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct SecurityModeReject : PlainMmMessage
@@ -662,6 +716,7 @@ struct SecurityModeReject : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct ServiceAccept : PlainMmMessage
@@ -675,6 +730,7 @@ struct ServiceAccept : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct ServiceReject : PlainMmMessage
@@ -688,6 +744,7 @@ struct ServiceReject : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct ServiceRequest : PlainMmMessage
@@ -704,6 +761,7 @@ struct ServiceRequest : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 struct UlNasTransport : PlainMmMessage
@@ -721,6 +779,7 @@ struct UlNasTransport : PlainMmMessage
     void onBuild(NasMessageBuilder &b);
     void onMutate(NasMessageMutator &m); // fuzzing
     void onCorrupt(NasMessageMutator &m, int ieIndex, const OctetString &bytes); // fuzzing
+    void onOmit(NasMessageMutator &m, int ieIndex);
 };
 
 } // namespace nas

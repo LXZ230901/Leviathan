@@ -19,7 +19,7 @@ namespace nas
 template <typename T>
 static void EncodeViaBuilder(T &msg, OctetString &stream)
 {
-    NasMessageBuilder builder{};
+    NasMessageBuilder builder{msg.omitMandatory};
     msg.onBuild(builder);
 
     for (auto &f : builder.mandatoryEncoders)
